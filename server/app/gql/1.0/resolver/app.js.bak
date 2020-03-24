@@ -1,0 +1,48 @@
+const DataLoader = require('dataloader');
+const AppUser = require('~server/app/model/appuser');
+const App = require('~server/app/model/app');
+const qfields = require('../util/qfields');
+
+const resolvers = {
+  Account: {
+    apps: async (parent, args, context, info) => {
+      const fields = qfields(info);
+
+      // 使用fields來命名DataLoder，避免同個Query查詢同一個collection但是選擇的是不同fields
+      const appLoader = `app_${fields}`;
+
+      if (!context.dataloaders.appUsers) {
+        const appUsers = new DataLoader(async (sky_ids) => {
+          const rs = await AppUser.findMany({ ids: sky_ids, field: 'sky_id', select: 'sky_id app_id' });
+          const rs2 = sky_ids.map((v) => {
+            const out = rs.filter((f) => f.sky_id === v);
+            return out;
+          });
+          return rs2;
+        });
+        context.dataloaders.appUsers = appUsers;
+      }
+      if (!context.dataloaders[appLoader]) {
+        const app = new DataLoader(async (app_ids) => {
+          const rs = await App.findMany({ ids: app_ids, select: fields });
+          const rs2 = app_ids.map((v) => {
+            const out = rs.find((f) => f._id.toString() === v);
+            return out;
+          });
+          return rs2;
+        });
+        context.dataloaders[appLoader] = app;
+      }
+
+      const rs = await context.dataloaders.appUsers.load(parent.sky_id);
+      const appIds = rs.map((v) => v.app_id.toString());
+      const rs2 = await context.dataloaders[appLoader].loadMany(appIds);
+
+      return rs2.map((v) => ({
+        ...v, app_id: v._id,
+      }));
+    },
+  },
+};
+
+module.exports = resolvers;

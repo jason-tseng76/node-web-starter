@@ -1,0 +1,28 @@
+// 設定會依環境ENV而改變的 變數、sensitive data等等
+const config = {
+  PORT: process.env.PORT || 8080,
+  IP: process.env.IP || '0.0.0.0',
+
+  // 要啟動的db connection資訊
+  DATABASE: {
+    MONGO: {
+      uri: 'mongodb+srv://<user>:<pwd>@cluster0-qopo7.gcp.mongodb.net/demo?retryWrites=true&w=majority',
+      options: {
+        readPreference: 'secondaryPreferred',
+        w: 'majority',
+      },
+    },
+  },
+
+  JWT_SECRET: '',
+
+  SMTP: {
+    service: 'Gmail',
+    auth: {
+      user: '',
+      pass: '',
+    },
+  },
+};
+
+module.exports = config;

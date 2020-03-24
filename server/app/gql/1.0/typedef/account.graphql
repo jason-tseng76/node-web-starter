@@ -1,0 +1,43 @@
+type PageInfo {
+  hasNextPage: Boolean
+}
+
+type AccountConnection {
+  edges: [AccountEdge]
+  pageInfo: PageInfo
+}
+
+type AccountEdge {
+  cursor: String
+  node: Account
+}
+
+type Account {
+  account_id: ID!
+  # sky_id: ID!
+  email: String
+  createdAt: Time
+}
+
+"""
+Account的分頁\n
+使用offset與limit進行分頁，totalCount為總筆數
+"""
+type AccountsPagenate {
+  "資料總筆數"
+  totalCount: Int,
+
+  "Account資料"
+  data: [Account],
+},
+
+type Query {
+  accountsPagenate(offset: Int, limit: Int): AccountsPagenate @queryNumber(limit:5)
+  accounts: [Account] #@auth
+  accountCursor(first: Int, after: ID, last: Int, before: ID): AccountConnection
+  # old: [Account] @deprecated (reason: "It's secret")
+}
+
+type Mutation {
+  createAccount(email:String!): Account #@auth
+}

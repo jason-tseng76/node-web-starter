@@ -1,0 +1,75 @@
+{
+  "name": "nodejs-web-starter",
+  "version": "1.0.0",
+  "description": "自訂初始框架 for nodejs",
+  "author": "Jason Tseng <jason.tseng76@gmail.com>",
+  "private": true,
+  "scripts": {
+    "docker-stage": "docker build --build-arg APP_ENV=stage -t skyid-stage .",
+    "docker-production": "docker build --build-arg APP_ENV=production -t skyid .",
+    "build": "cross-env NODE_ENV=production APP_ENV=production nuxt build",
+    "build-stage": "cross-env NODE_ENV=production APP_ENV=stage nuxt build",
+    "dev": "node server",
+    "go": "cross-env NODE_ENV=production APP_ENV=production node server",
+    "git_lf": "git config core.autocrlf false",
+    "apidoc": "apidoc -i ./server/app/controller/ -o ./doc/"
+  },
+  "apidoc": {
+    "name": "Apollo API v1.0",
+    "version": "1.0.0",
+    "title": "Custom apiDoc browser title",
+    "url": "https://api.github.com/v1",
+    "header": {
+      "title": "My own header title",
+      "filename": "header.md"
+    },
+    "footer": {
+      "title": "My own footer title",
+      "filename": "footer.md"
+    },
+    "template": {
+      "withCompare": false
+    }
+  },
+  "_moduleAliases": {
+    "~root": "./",
+    "~server": "server"
+  },
+  "dependencies": {
+    "apollo-server-express": "^2.10.0",
+    "async": "^3.1.0",
+    "axios": "^0.19.2",
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "cross-env": "^7.0.2",
+    "dataloader": "^2.0.0",
+    "express": "^4.16.3",
+    "express-rate-limit": "^5.1.1",
+    "graphql": "^14.6.0",
+    "helmet": "^3.13.0",
+    "js-cookie": "^2.2.1",
+    "jsonwebtoken": "^8.5.1",
+    "log4js": "^6.1.2",
+    "luxon": "^1.4.2",
+    "merge-graphql-schemas": "^1.7.3",
+    "module-alias": "^2.1.0",
+    "mongoose": "^5.9.4",
+    "nuxt": "^2.11.0",
+    "pug": "^2.0.4",
+    "validator": "^12.2.0"
+  },
+  "devDependencies": {
+    "apidoc": "^0.20.1",
+    "babel-eslint": "^10.0.3",
+    "babel-plugin-console-source": "^2.0.4",
+    "babel-plugin-module-resolver": "^4.0.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-import-resolver-babel-module": "^5.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-vue": "^6.2.2",
+    "pug-plain-loader": "^1.0.0",
+    "stylus": "^0.54.7",
+    "stylus-loader": "^3.0.2"
+  }
+}

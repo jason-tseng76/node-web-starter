@@ -1,0 +1,2 @@
+directive @auth on FIELD_DEFINITION
+directive @queryNumber(limit:Int=5) on FIELD_DEFINITION
