@@ -1,4 +1,4 @@
-/* eslint no-console:0 */
+/* eslint no-console:0, global-require:0 */
 
 // 使用module-alias
 require('module-alias/register');
@@ -14,6 +14,8 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const event = require('~server/module/event');
 
+const pkgjson = require('../package.json');
+
 // **********************************
 // 引用設定檔
 const config = require('./config');
@@ -27,48 +29,47 @@ let server = null;
 
 // **********************************
 // 設定log
-require('~server/module/jlog/logger').init({
+const logger = require('~server/module/jlog/logger').init({
   app,
   env: process.env.APP_ENV,
   logPath: path.join('server', 'log'),
 });
 // **********************************
 
-// // **********************************
-// // 設定stackdriver，需要 @google-cloud/error-reporting
-// // 如果是run在GCP上，projectId與keyFilename參數可忽略
-// require('~server/module/jlog/errorReport').init({
-//   serviceContext: {
-//     service: '名稱',
-//     version: process.env.APP_ENV,
-//   },
-//   // projectId: 'meshplus',
-//   // keyFilename: './server/MeshPlus-27b4a8e9ee7a.json',
-//   reportMode: 'production', // always, never
-// });
-// // **********************************
+if (process.env.APP_ENV !== 'development') {
+  // **********************************
+  // 設定stackdriver，需要 @google-cloud/error-reporting
+  // 如果是run在GCP上，projectId與keyFilename參數可忽略
+  require('~server/module/jlog/errorReport').init({
+    serviceContext: {
+      service: pkgjson.name,
+      version: process.env.APP_ENV,
+    },
+    // projectId: 'meshplus',
+    // keyFilename: './server/MeshPlus-27b4a8e9ee7a.json',
+    reportMode: 'production', // always, never
+  });
+  // **********************************
 
-// // **********************************
-// // 啟動備份到GCS的程序，需要 @google-cloud/storage
-// const gcsBackup = require('~server/module/jlog/GCSBackup');
-
-// if (process.env.APP_ENV !== 'development') {
-//   gcsBackup
-//     .start({
-//       logPath: path.join('server', 'log'),
-//       projectId: 'meshplus',
-//       keyFilename: './server/MeshPlus-27b4a8e9ee7a.json',
-//       bucketName: 'mesh_logs',
-//       remotePath: process.env.APP_ENV === 'production' ? 'skylabel' : `skylabel_${process.env.APP_ENV}`,
-//     })
-//     .on('error', (e) => {
-//       log.error(e);
-//     })
-//     .on('warn', (e) => {
-//       log.warn(e);
-//     });
-// }
-// // **********************************
+  // **********************************
+  // 啟動備份到GCS的程序，需要 @google-cloud/storag
+  const gcsBackup = require('~server/module/jlog/GCSBackup');
+  gcsBackup
+    .start({
+      logPath: path.join('server', 'log'),
+      projectId: 'meshplus',
+      keyFilename: './server/MeshPlus-27b4a8e9ee7a.json',
+      bucketName: 'mesh_logs',
+      remotePath: process.env.APP_ENV === 'production' ? pkgjson.name : `${pkgjson.name}_${process.env.APP_ENV}`,
+    })
+    .on('error', (e) => {
+      logger.error(e);
+    })
+    .on('warn', (e) => {
+      logger.warn(e);
+    });
+}
+// **********************************
 
 // **********************************
 // 設定email的smtp
@@ -131,6 +132,5 @@ app.disable('view cache');
 require('./app')(app);
 
 server = app.listen(config.PORT, config.IP, () => {
-  // log.info(`Listening on ${config.IP}, port ${config.PORT}`);
   console.log('\x1b[37m\x1b[44m%s\x1b[0m', `Listening on ${config.IP}, port ${config.PORT}`);
 });

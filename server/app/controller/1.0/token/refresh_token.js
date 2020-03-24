@@ -1,6 +1,6 @@
 const RefreshToken = require('~server/app/model/refresh_token');
 const SKError = require('~server/module/errorHandler/SKError');
-const jwttoken = require('~server/module/jwtoken/jwtoken');
+const jwt = require('~server/module/jwt');
 const vcheck = require('~server/module/vartool/vcheck');
 
 /**
@@ -30,11 +30,11 @@ const controller = async (req, res, next) => {
     const rs = await RefreshToken.findOne({ token: r_token }).select('account_id').lean().exec();
     if (!rs) throw new SKError('E001004');
 
-    const token = jwttoken.sign({
+    const token = jwt.sign({
       payload: { id: rs.account_id.toString() },
       tokenlife: '1h',
     });
-    const tokendata = jwttoken.verify(token);
+    const tokendata = jwt.verify(token);
 
     res.json({
       status: 'OK',

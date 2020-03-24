@@ -1,7 +1,7 @@
 const Account = require('~server/app/model/account');
 const RefreshToken = require('~server/app/model/refresh_token');
 const SKError = require('~server/module/errorHandler/SKError');
-const jwttoken = require('~server/module/jwtoken/jwtoken');
+const jwt = require('~server/module/jwt');
 const vutils = require('~server/module/vartool/vutils');
 
 /**
@@ -34,11 +34,11 @@ const controller = async (req, res, next) => {
     const rs = await Account.findOne({ email }).lean().exec();
     if (!rs) throw new SKError('E001007');
 
-    const token = jwttoken.sign({
+    const token = jwt.sign({
       payload: { id: rs._id.toString() },
       tokenlife: '1h',
     });
-    const tokendata = jwttoken.verify(token);
+    const tokendata = jwt.verify(token);
     const refresh_token = vutils.randomStr(5) + vutils.newID();
     const ip = req.headers['x-forwarded-for']
       || req.connection.remoteAddress

@@ -15,10 +15,10 @@
     "apidoc": "apidoc -i ./server/app/controller/ -o ./doc/"
   },
   "apidoc": {
-    "name": "Apollo API v1.0",
+    "name": "API v1.0",
     "version": "1.0.0",
-    "title": "Custom apiDoc browser title",
-    "url": "https://api.github.com/v1",
+    "title": "自訂初始框架 for nodejs",
+    "url": "http://localhost:8080",
     "header": {
       "title": "My own header title",
       "filename": "header.md"

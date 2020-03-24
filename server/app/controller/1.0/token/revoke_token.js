@@ -5,10 +5,14 @@ const SKError = require('~server/module/errorHandler/SKError');
  * Revoke token
  * @api {post} /api/v1.0/token/revoke RevokeToken
  * @apiName RevokeToken
- * @apiGroup User
+ * @apiGroup Token
  * @apiUse AuthBearerHeader
- * @apiSuccess {String} firstname Firstname of the User.
- * @apiSuccess {String} lastname  Lastname of the User.
+ * @apiSuccess {String} token The token to be revoked
+ * @apiSuccessExample {json} Success-Response:
+ * {
+ *  "status":"OK"
+ * }
+ * @apiUse APIError
  */
 const controller = async (req, res, next) => {
   try {
