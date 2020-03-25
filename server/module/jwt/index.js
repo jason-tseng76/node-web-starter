@@ -5,7 +5,10 @@ const SKError = require('~server/module/errorHandler/SKError');
 const jwt = {};
 
 /**
+ * 說明：
  * 生成jwt token
+ *
+ * 參數：
  * @param {Object} options - 參數
  * @param {Object} options.payload - 要被編碼的物件
  * @param {String} options.secret - jwt的secret
@@ -20,6 +23,7 @@ jwt.sign = ({ payload, secret = config.JWT_SECRET, tokenlife = '7d' }) => {
 /**
  * 解析jwt token，解析錯誤會throw SKError。
  * E001004=解析錯誤，E001005=過期。
+ *
  * @param {String} token - jwt token
  * @param {String} secret - jwt的secret
  * @returns {Object} payload

@@ -1,10 +1,12 @@
 const jwt = require('~root/server/module/jwt');
 
 /**
- * 解析jwt token的middleware，
- * 將token轉成payload放到res.locals.__payload裡。
- * 如果有錯誤，錯誤會被放到res.locals.__jwtError裡。
- * @param {String=} tokenName jwt存在cookies裡的變數名稱
+ * 解析jwt token的middleware，會優先檢查header裡的Authorization，再檢查cookies。即使header的token錯誤，也不會檢查cookies，除非header裡沒有Authorization。
+ *
+ * 解析後的payload會放到`res.locals.__payload`裡。
+ * 如果解析錯誤，錯誤會被放到`res.locals.__jwtError`裡。
+ *
+ * @param {String=} tokenName - jwt存在cookies裡的變數名稱，如果沒有值，就不檢查cookies
  * @returns {Function} Express middleware
 */
 const jwtVerify = (tokenName) => {

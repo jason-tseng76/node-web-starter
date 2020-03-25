@@ -2,19 +2,19 @@ const rateLimit = require('express-rate-limit');
 const SKError = require('~server/module/errorHandler/SKError');
 
 /**
-說明
+說明:
 簡化RateLimit寫法
 
-使用
+使用:
 ratelimit({windowMs, max, whiteOrigin}):Middleware
 
-參數
+參數:
 windowMs: 每多少毫秒重新reset一次，預設60000
 max: 在windowMs這個區間內允許的呼叫次數，預設50
 whiteOrigin: 如果呼叫是從哪些origin來的就不列入計算，直接pass (Array)
 whiteQuery: 如果在網址裡帶某個參數的話就不列入計算，直接pass (Object)
 
-範例
+範例:
 const limiter = ratelimit({
   windowMs: 60000,
   max: 50,
