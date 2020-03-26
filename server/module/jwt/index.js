@@ -5,18 +5,29 @@ const SKError = require('~server/module/errorHandler/SKError');
 const jwt = {};
 
 /**
+ * 加密的secret
+ */
+jwt.secret = config.JWT_SECRET;
+
+/**
  * 說明：
  * 生成jwt token
  *
- * 參數：
+ * - 參數：
+ *  - payload: payload
+ *  - secret: 加密的secret，預設值可用jwt.secret設定，預設會使用config.JWT_SECRET
+ *  - tokenlife: token的生命長度，預設為'7d'。如果payload裡有exp，就忽略tokenlife
  * @param {Object} options - 參數
- * @param {Object} options.payload - 要被編碼的物件
- * @param {String} options.secret - jwt的secret
- * @param {(String|Number)} options.tokenlife - token的存活時間
+ * @param {Object=} options.payload - 要被編碼的物件
+ * @param {String=} options.secret - jwt的secret
+ * @param {(String|Number)=} options.tokenlife - token的存活時間
  * @returns {String} jwt token
 */
-jwt.sign = ({ payload, secret = config.JWT_SECRET, tokenlife = '7d' }) => {
-  const token = jsonwebtoken.sign(payload, secret, { expiresIn: tokenlife });
+jwt.sign = ({ payload, secret = jwt.secret, tokenlife = '7d' }) => {
+  let options = { expiresIn: tokenlife };
+  // 如果payload裡有exp，就忽略tokenlife
+  if (payload.exp && !Number.isNaN(Number(payload.exp))) options = {};
+  const token = jsonwebtoken.sign(payload, secret, options);
   return token;
 };
 
@@ -24,18 +35,25 @@ jwt.sign = ({ payload, secret = config.JWT_SECRET, tokenlife = '7d' }) => {
  * 解析jwt token，解析錯誤會throw SKError。
  * E001004=解析錯誤，E001005=過期。
  *
+ * - 參數
+ *  - token: 要被解析的token
+ *  - secret: 加密的secret，預設值可用jwt.secret設定，預設會使用config.JWT_SECRET
+ *  - options: 同jwtwebtoken的options
+ *
  * @param {String} token - jwt token
- * @param {String} secret - jwt的secret
+ * @param {String=} secret - jwt的secret
+ * @param {Object=} options - jwtwebtoken的option
  * @returns {Object} payload
  */
-jwt.verify = (token = '', secret = config.JWT_SECRET) => {
+jwt.verify = (token, secret = jwt.secret, options) => {
+  const rsecret = secret || jwt.secret;
   try {
-    if (token === '') {
+    if (!token) {
       const e = new Error('JsonWebTokenError');
       e.name = 'JsonWebTokenError';
       throw e;
     }
-    const decoded = jsonwebtoken.verify(token, secret);
+    const decoded = jsonwebtoken.verify(token, rsecret, options);
     return decoded;
   } catch (err) {
     if (err.name === 'JsonWebTokenError' || err.message === 'JsonWebTokenError') {

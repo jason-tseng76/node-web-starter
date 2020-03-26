@@ -1,37 +1,50 @@
 const jwt = require('~root/server/module/jwt');
-
+const SKError = require('~server/module/errorHandler/SKError');
 /**
  * 解析jwt token的middleware，會優先檢查header裡的Authorization，再檢查cookies。即使header的token錯誤，也不會檢查cookies，除非header裡沒有Authorization。
  *
  * 解析後的payload會放到`res.locals.__payload`裡。
  * 如果解析錯誤，錯誤會被放到`res.locals.__jwtError`裡。
  *
- * @param {String=} tokenName - jwt存在cookies裡的變數名稱，如果沒有值，就不檢查cookies
+ *
+ * - 參數:
+ *  - cookieName: jwt存在cookies裡的變數名稱，如果沒有值，就不檢查cookies
+ *  - secret: jwt加密的secret
+ *
+ * @param {String} cookieName - jwt存在cookies裡的變數名稱，如果沒有值，就不檢查cookies
+ * @param {String} secret - jwt加密的secret，若是沒有，就會用預設值
  * @returns {Function} Express middleware
 */
-const jwtVerify = (tokenName) => {
+module.exports = (cookieName, secret) => {
   const mw = (req, res, next) => {
     let token = '';
+    // 從header取得token
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
       token = req.headers.authorization.split(' ')[1] || '';
     }
-    if (token === '' && tokenName) {
-      token = req.signedCookies[tokenName] || req.cookies[tokenName] || '';
+    // 如果header沒有token而cookieName有值，就檢查cookies
+    if (token === '' && cookieName) {
+      token = req.signedCookies[cookieName] || req.cookies[cookieName] || '';
+    }
+    // 開發模式下允許用?access_token帶入
+    if (token === '' && process.env.APP_ENV === 'development') {
+      token = req.query.access_token || '';
     }
 
-    res.locals.__token = token;
-    // res.set('Authorization', 'Bearer bbbbbb');
     try {
-      const payload = jwt.verify(token);
+      const payload = jwt.verify(token, secret, { ignoreExpiration: true });
+      const nowtime = Math.floor((new Date()).getTime() / 1000);
       res.locals.__payload = payload;
+
+      // 如果token過期
+      if (payload.exp <= nowtime) throw new SKError('E001005');
     } catch (e) {
-      // res.locals.__jwtError = e.toLang(res.locals.__lang || 'zh');
       res.locals.__jwtError = e;
+    } finally {
+      res.locals.__token = token;
     }
 
     next();
   };
   return mw;
 };
-
-module.exports = jwtVerify;
