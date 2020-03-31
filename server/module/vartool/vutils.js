@@ -136,7 +136,22 @@ fn.datesBetween = (startDate, endDate) => {
 // 傳入多個array，並指定keyfield(非必要)
 // 回傳一個keyfield為unique的array
 // 如果沒有指定keyfield，直接比對陣列值
-fn.arrayUnique = (arrays = [], keyfield) => {
+/**
+ * 產生一個具有unique值的array。
+ * 傳入多個array，並指定keyfield(非必要)，回傳一個keyfield為unique的array，如果沒有指定keyfield，直接比對陣列值。
+ * 回傳的array會是原array的deep copy，並不影響原本的array。
+ *
+ * @example
+ * const a1 = [1, 2, 3];
+ * const a2 = [1, 3, 5];
+ * const result = vutils.arrayDistinct([a1, a2]);
+ * console.log(result); //[1, 2, 3, 5]
+ *
+ * @param {Object[]} arrays - 要合併的多個array
+ * @param {String=} keyfield - 如果array裡是Object，指定要distinct的field name
+ * @returns {Object[]} result array
+ */
+fn.arrayDistinct = (arrays = [], keyfield) => {
   const obj = {};
   const result = [];
   arrays.forEach((ar) => {

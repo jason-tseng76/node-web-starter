@@ -1,5 +1,5 @@
 const Account = require('~server/app/model/account');
-// const RefreshToken = require('~server/app/model/refresh_token');
+const RefreshToken = require('~server/app/model/refresh_token');
 const AccessToken = require('~server/app/model/access_token');
 const SKError = require('~server/module/errorHandler/SKError');
 const jwt = require('~server/module/jwt');
@@ -41,23 +41,28 @@ const controller = async (req, res, next) => {
       tokenlife: '1s',
     });
     const tokendata = jwt.verify(token);
-    // const ip = req.headers['x-forwarded-for']
-    //   || req.connection.remoteAddress
-    //   || req.socket.remoteAddress
-    //   || req.connection.socket.remoteAddress;
+    const ip = req.headers['x-forwarded-for']
+      || req.connection.remoteAddress
+      || req.socket.remoteAddress
+      || req.connection.socket.remoteAddress;
 
-    // const newRefreshToken = new RefreshToken({
-    //   token: refresh_token,
-    //   account_id: rs._id.toString(),
-    //   ip: ip.split(',')[0],
-    // });
+    const newRefreshToken = new RefreshToken({
+      refresh_token,
+      account_id: rs._id.toString(),
+      ip: ip.split(',')[0],
+    });
     // await newRefreshToken.save();
 
     const newAccessToken = new AccessToken({
       access_token: token,
+      refresh_token,
       account_id: rs._id.toString(),
     });
-    await newAccessToken.save();
+    // await newAccessToken.save();
+    await Promise.all([
+      newRefreshToken.save(),
+      newAccessToken.save(),
+    ]);
 
     res.json({
       status: 'OK',

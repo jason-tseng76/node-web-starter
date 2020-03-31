@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const _schema = mongoose.Schema({
   access_token: { type: String, index: true },
   refresh_token: { type: String, index: true },
-  account_id: { type: String },
+  new_access_token: { type: String },
   createdAt: { type: Date, default: Date.now },
   refreshAt: { type: Date, index: true },
 });

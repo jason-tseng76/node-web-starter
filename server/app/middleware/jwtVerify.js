@@ -3,19 +3,17 @@ const SKError = require('~server/module/errorHandler/SKError');
 /**
  * 解析jwt token的middleware，會優先檢查header裡的Authorization，再檢查cookies。即使header的token錯誤，也不會檢查cookies，除非header裡沒有Authorization。
  *
- * 解析後的payload會放到`res.locals.__payload`裡。
+ * 解析後的payload會放到`res.locals.__jwtPayload`裡。
  * 如果解析錯誤，錯誤會被放到`res.locals.__jwtError`裡。
  *
  *
  * - 參數:
  *  - cookieName: jwt存在cookies裡的變數名稱，如果沒有值，就不檢查cookies
- *  - secret: jwt加密的secret
  *
  * @param {String} cookieName - jwt存在cookies裡的變數名稱，如果沒有值，就不檢查cookies
- * @param {String} secret - jwt加密的secret，若是沒有，就會用預設值
  * @returns {Function} Express middleware
 */
-module.exports = (cookieName, secret) => {
+module.exports = (cookieName) => {
   const mw = (req, res, next) => {
     let token = '';
     // 從header取得token
@@ -32,16 +30,16 @@ module.exports = (cookieName, secret) => {
     }
 
     try {
-      const payload = jwt.verify(token, secret, { ignoreExpiration: true });
+      const payload = jwt.verify(token, '', { ignoreExpiration: true });
       const nowtime = Math.floor((new Date()).getTime() / 1000);
-      res.locals.__payload = payload;
+      res.locals.__jwtPayload = payload;
 
       // 如果token過期
       if (payload.exp <= nowtime) throw new SKError('E001005');
     } catch (e) {
       res.locals.__jwtError = e;
     } finally {
-      res.locals.__token = token;
+      res.locals.__jwtAccessToken = token;
     }
 
     next();
