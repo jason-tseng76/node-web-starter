@@ -1,4 +1,5 @@
-const RefreshToken = require('~server/app/model/refresh_token');
+// const RefreshToken = require('~server/app/model/refresh_token');
+const AccessToken = require('~server/app/model/access_token');
 const vcheck = require('~server/module/vartool/vcheck');
 const SKError = require('~server/module/errorHandler/SKError');
 /**
@@ -7,7 +8,7 @@ const SKError = require('~server/module/errorHandler/SKError');
  * @apiName RevokeToken
  * @apiGroup Token
  * @apiUse AuthBearerHeader
- * @apiSuccess {String} token The token to be revoked
+ * @apiParam {String} token 要取消的access_token或refresh_token
  * @apiSuccessExample {json} Success-Response:
  * {
  *  "status":"OK"
@@ -21,8 +22,10 @@ const controller = async (req, res, next) => {
 
     // const rs = await RefreshToken.findOne({ token: r_token }).select('_id').lean().exec();
     // if (rs) {
-    await RefreshToken.remove({ token: r_token }).exec();
+    // await RefreshToken.remove({ token: r_token }).exec();
     // }
+    // await AccessToken.remove({ $or: [{ access_token: r_token }, { refresh_token: r_token }] }).exec();
+    await AccessToken.update({ $or: [{ access_token: r_token }, { refresh_token: r_token }] }, { revoked: true }).exec();
 
     res.json({
       status: 'OK',

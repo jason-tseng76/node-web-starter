@@ -1,4 +1,5 @@
-const RefreshToken = require('~server/app/model/refresh_token');
+// const RefreshToken = require('~server/app/model/refresh_token');
+const AccessToken = require('~server/app/model/access_token');
 const SKError = require('~server/module/errorHandler/SKError');
 const jwt = require('~server/module/jwt');
 const vcheck = require('~server/module/vartool/vcheck');
@@ -25,22 +26,35 @@ const controller = async (req, res, next) => {
   try {
     const r_token = vcheck.str(req.body.refresh_token);
     if (!r_token) throw new SKError('E001004');
-    // const g_type = req.body.grant_type; //grant_type=refresh_token
 
-    const rs = await RefreshToken.findOne({ token: r_token }).select('account_id').lean().exec();
-    if (!rs) throw new SKError('E001004');
+    // const rs = await RefreshToken.findOne({ token: r_token }).select('account_id').lean().exec();
+    // if (!rs) throw new SKError('E001004');
+    const oldAccessToken = await AccessToken.findOne({ refresh_token: r_token }).sort('-_id').lean().exec();
+    if (!oldAccessToken) throw new SKError('E001004');
+    // 已經被revoked
+    if (oldAccessToken.revoked) throw new SKError('E001004');
 
-    const token = jwt.sign({
-      payload: { id: rs.account_id.toString() },
-      tokenlife: '1h',
+    const nowtime = Math.floor((new Date()).getTime() / 1000);
+    const payload = jwt.verify(oldAccessToken.access_token, '', { ignoreExpiration: true });
+
+    // 取得原本token的生命週期
+    const tokenlife = payload.exp - payload.iat;
+    payload.iat = nowtime;
+    payload.exp = nowtime + tokenlife;
+    // 重新sign一個新的token
+    const token = jwt.sign({ payload });
+
+    const newAccessToken = new AccessToken({
+      access_token: token,
+      refresh_token: r_token,
     });
-    const tokendata = jwt.verify(token);
+    await newAccessToken.save();
 
     res.json({
       status: 'OK',
       data: {
         access_token: token,
-        expires_in: tokendata.exp,
+        expires_in: payload.exp,
         // refresh_toekn,
         token_type: 'Bearer',
       },

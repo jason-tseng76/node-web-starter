@@ -21,8 +21,10 @@ const jwtRefresh = () => {
         const old_token = res.locals.__jwtAccessToken;
         const nowtime = Math.floor((new Date()).getTime() / 1000);
         const oldAccessToken = await AccessToken.findOne({ access_token: old_token }).lean().exec();
-        // 舊的token不存在於資料庫，可能是被revoke掉了
+        // 舊的token不存在於資料庫
         if (!oldAccessToken) throw new SKError('E001004');
+        // 已經被revoked
+        if (oldAccessToken.revoked) throw new SKError('E001004');
 
         let token = '';
         let payload = {};

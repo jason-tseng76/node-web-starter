@@ -6,6 +6,7 @@ const _schema = mongoose.Schema({
   new_access_token: { type: String },
   createdAt: { type: Date, default: Date.now },
   refreshAt: { type: Date, index: true },
+  revoked: { type: Boolean },
 });
 
 module.exports = mongoose.model('access_tokens', _schema);

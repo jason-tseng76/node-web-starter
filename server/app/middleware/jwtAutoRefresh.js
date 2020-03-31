@@ -46,6 +46,8 @@ const jwtAutoRefresh = ({ cookieName, autoRefresh = true } = {}) => {
         const oldAccessToken = await AccessToken.findOne({ access_token: token }).lean().exec();
         // 舊的token不存在於資料庫，可能是被revoke掉了
         if (!oldAccessToken) throw new SKError('E001004');
+        // 已經被revoked
+        if (oldAccessToken.revoked) throw new SKError('E001004');
 
         if (oldAccessToken.refreshAt) {
           // 如果已經refresh過
