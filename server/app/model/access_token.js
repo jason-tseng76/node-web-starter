@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const _schema = mongoose.Schema({
+const _schema = new mongoose.Schema({
   access_token: { type: String, index: true },
   refresh_token: { type: String, index: true },
   new_access_token: { type: String },
@@ -9,8 +9,9 @@ const _schema = mongoose.Schema({
   revoked: { type: Boolean },
 });
 
-module.exports = mongoose.model('access_tokens', _schema);
+// module.exports = mongoose.model('access_tokens', _schema);
+const model = mongoose.model('access_tokens', _schema);
+module.exports = model;
 
 // 移除index方法
-// const model = mongoose.model('access_tokens', _schema);
 // model.collection.dropIndex({ account_id: 1 });
