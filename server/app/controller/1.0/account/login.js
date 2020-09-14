@@ -1,7 +1,8 @@
 const Account = require('~server/app/model/account');
 const RefreshToken = require('~server/app/model/refresh_token');
+const AccessToken = require('~server/app/model/access_token');
 const SKError = require('~server/module/errorHandler/SKError');
-const jwttoken = require('~server/module/jwtoken/jwtoken');
+const jwt = require('~server/module/jwt');
 const vutils = require('~server/module/vartool/vutils');
 
 /**
@@ -34,23 +35,34 @@ const controller = async (req, res, next) => {
     const rs = await Account.findOne({ email }).lean().exec();
     if (!rs) throw new SKError('E001007');
 
-    const token = jwttoken.sign({
-      payload: { id: rs._id.toString() },
-      tokenlife: '1h',
-    });
-    const tokendata = jwttoken.verify(token);
     const refresh_token = vutils.randomStr(5) + vutils.newID();
+    const token = jwt.sign({
+      payload: { i: rs._id.toString() },
+      tokenlife: '1s',
+    });
+    const tokendata = jwt.verify(token);
     const ip = req.headers['x-forwarded-for']
       || req.connection.remoteAddress
       || req.socket.remoteAddress
       || req.connection.socket.remoteAddress;
 
     const newRefreshToken = new RefreshToken({
-      token: refresh_token,
+      refresh_token,
       account_id: rs._id.toString(),
       ip: ip.split(',')[0],
     });
-    await newRefreshToken.save();
+    // await newRefreshToken.save();
+
+    const newAccessToken = new AccessToken({
+      access_token: token,
+      refresh_token,
+      account_id: rs._id.toString(),
+    });
+    // await newAccessToken.save();
+    await Promise.all([
+      newRefreshToken.save(),
+      newAccessToken.save(),
+    ]);
 
     res.json({
       status: 'OK',

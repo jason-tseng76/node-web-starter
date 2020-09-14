@@ -1,21 +1,23 @@
-/*
-說明
-簡化cors的寫法。
-
-使用
-cors(whitelist):Middleware
-
-參數
-whitelist: Array，允許列在whiteList裡的origin可以進行cors，如果要允許全部，把whitelist設為true或是不帶值就可以
-
-範例
-const allowLocalHost = cors(['http://localhost:8080']);
-router.options('/api', allowLocalHost);
-router.use('/api', allowLocalHost);
-*/
-
 const cors = require('cors');
 
+/**
+* 說明:
+* 簡化cors的寫法。
+*
+* 使用:
+* cors(whitelist):Middleware
+*
+* - 參數:
+*   - whitelist: Array，允許列在whiteList裡的origin可以進行cors，如果要允許全部，把whitelist設為true或是不帶值就可以
+*
+* @example
+* const allowLocalHost = cors(['http://localhost:8080']);
+* router.options('/api', allowLocalHost);
+* router.use('/api', allowLocalHost);
+*
+* @param {(String[]|true)=} whitelist 列在whiteList裡的origin可以進行cors，如果要允許全部，把whitelist設為true或是不帶值就可以
+* @returns {Function} middleware function
+*/
 const apply = (whitelist) => {
   let corsOption = null;
   if (whitelist === true || whitelist === undefined) {

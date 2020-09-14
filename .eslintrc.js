@@ -11,13 +11,12 @@ module.exports = {
   settings: {
     // 使用在.babelrc設定的alias
     'import/resolver': {
-      'babel-module': {
-        // 不知道為何在某次更新package時故障了，只好自己寫alias
-        alias: {
-          '~': './src',
-          '~root': './',
-          '~server': './server',
-        },
+      alias: {
+        map: [
+          ['~root', './'],
+          ['~server', './server'],
+          ['~', './src'],
+        ],
       },
     },
     // 加入core-modules，import時才不會報錯(nuxtjs內建vue與vuex)

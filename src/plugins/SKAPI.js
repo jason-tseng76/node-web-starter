@@ -55,7 +55,7 @@ SKAPI.setAccessToken = (token) => {
   _accessToken = token;
 };
 
-SKAPI.cancelCall = (id) => {
+SKAPI.cancelCall = async (id) => {
   if (!id) return;
   const c_id = id.toString();
   try {
@@ -91,7 +91,7 @@ SKAPI.call = async ({
 
     // 如果有指定cancelID，先把同ID的request取消，再加入新的cancelSoure
     if (cancelID) {
-      SKAPI.cancelCall(cancelID);
+      await SKAPI.cancelCall(cancelID);
       const source = axios.CancelToken.source();
       opt.cancelToken = source.token;
       _cancelSources[cancelID.toString()] = source;

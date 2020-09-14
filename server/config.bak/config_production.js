@@ -12,9 +12,19 @@ const config = {
         w: 'majority',
       },
     },
+    MYSQL: {
+      host: '127.0.0.1',
+      user: 'root',
+      password: 'password',
+      database: 'dbname',
+
+      dateStrings: true,
+      timezone: '+08:00',
+    },
   },
 
   JWT_SECRET: '',
+  COOKIE_SECRET: '',
 
   SMTP: {
     service: 'Gmail',

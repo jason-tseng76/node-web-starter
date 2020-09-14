@@ -3,7 +3,6 @@ const { fileLoader, mergeTypes, mergeResolvers } = require('merge-graphql-schema
 const path = require('path');
 const skCors = require('../../middleware/skCors');
 const skRateLimit = require('~server/app/middleware/skRatelimit');
-const jwtMiddleware = require('~server/module/jwtoken/parseMiddleWare');
 const SKError = require('~server/module/errorHandler/SKError');
 const auth = require('./directive/auth');
 const queryNumber = require('./directive/queryNumber');
@@ -110,8 +109,6 @@ const apply = (app) => {
 
   const limiter1 = skRateLimit({ windowMs: 1000 * 60, max: 50 });
   app.use('/gql/v1.0', limiter1);
-
-  app.use('/gql/v1.0', jwtMiddleware('__t'));
 
   apollo.applyMiddleware({
     app,

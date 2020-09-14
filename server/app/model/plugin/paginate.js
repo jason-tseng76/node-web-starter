@@ -1,5 +1,5 @@
 const plugin = (schema, options) => {
-  schema.statics.pagenate = async function pagenate({
+  schema.statics.paginate = async function paginate({
     find = {}, select = '-__v', sort = '-_id', offset = 0, limit = 10,
   } = {
     find: {}, select: '-__v', sort: '-_id', offset: 0, limit: 10,

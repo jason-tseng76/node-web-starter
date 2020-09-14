@@ -1,14 +1,14 @@
 const SKError = require('./SKError');
-const event = require('~server/module/event');
+const skevent = require('~server/module/skevent');
 // 處理error
 // 所有的router或middleware如果next(err)，都會先到這裡來處理
 // 這邊負責將錯誤代碼返回前端頁面
 module.exports = (err, req, res, next) => {
   if (err) {
-    console.log('\x1b[1m\x1b[33m%s\x1b[0m', '===== /module/errorHandler/errorMiddle =====');
-    console.log('\x1b[33m');
-    console.log(err);
-    console.log('\x1b[1m\x1b[33m%s\x1b[0m', '============================================');
+    // console.log('\x1b[1m\x1b[33m%s\x1b[0m', '===== /module/errorHandler/errorMiddle =====');
+    // console.log('\x1b[33m');
+    // console.log(err);
+    // console.log('\x1b[1m\x1b[33m%s\x1b[0m', '============================================');
     let errmsg = '';
     let httpStatus = 500;
     let code = '500';
@@ -27,7 +27,7 @@ module.exports = (err, req, res, next) => {
         errmsg = err.message;
 
         // 因為是原生Error，可能會是重大錯誤，所以需要回報。
-        event.dispatcher.fire(event.type.REPORT_ERROR, err);
+        skevent.fire({ type: skevent.types.REPORT_ERROR, data: err });
       }
     } else {
       errmsg = err;

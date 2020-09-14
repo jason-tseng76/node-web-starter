@@ -3,7 +3,13 @@ const vcheck = require('./vcheck');
 
 const fn = {};
 
-// 亂數產生字串
+/**
+ * 產生亂數字串，產生的字元預設為[a-zA-Z0-9]。
+ *
+ * @param {Number} [length=10] - 產生的字串長度，預設為10
+ * @param {String} [addchars] - 除了預設的字元以外，還要加入的字元組
+ * @returns {String} result string
+*/
 fn.randomStr = (length = 10, addchars = '') => {
   let allowstr = '';
   for (let i = 0; i < 26; i += 1) {
@@ -19,7 +25,12 @@ fn.randomStr = (length = 10, addchars = '') => {
   return id;
 };
 
-// 依照timestamp+亂數產生字串
+/**
+ * 依照timestamp加上亂數產生ID，長度最少為15。
+ *
+ * @param {Number} [length=15] - 產生的字串長度，預設為15，不可低於15
+ * @returns {String} result string
+*/
 fn.newID = (length = 15) => {
   let len = length < 15 ? 15 : length;
   const timestamp = new Date().getTime().toString(36);
@@ -28,16 +39,31 @@ fn.newID = (length = 15) => {
   return `${timestamp}${rand}`;
 };
 
-fn.newVaID = (origin_id) => {
+/**
+ * 依照傳入字串產生可驗證ID，驗證碼會加在原始字串後，共三碼。
+ *
+ * 要驗證該ID是否正確，使用verifyVaID進行驗證。
+ *
+ * @param {String} originid - 原始字串
+ * @returns {String} result string
+*/
+fn.newVaID = (originid) => {
   let sum = 0;
-  for (let i = 0; i < origin_id.length; i += 1) {
-    sum += origin_id.charCodeAt(i);
+  for (let i = 0; i < originid.length; i += 1) {
+    sum += originid.charCodeAt(i);
   }
   sum += sum % 10;
   let ext = sum.toString(36).substr(0, 3);
-  if (ext.length < 3) ext = `0${ext}`;
-  return `${origin_id}${ext}`;
+  while (ext.length < 3) { ext = `0${ext}`; }
+  return `${originid}${ext}`;
 };
+
+/**
+ * 驗證是否由newVaID所產生的ID。
+ *
+ * @param {String} vaid - 輸入字串
+ * @returns {Boolean} result
+*/
 fn.verifyVaID = (vaid) => {
   const pre = vaid.substr(0, vaid.length - 3);
 
@@ -45,6 +71,12 @@ fn.verifyVaID = (vaid) => {
   return vaid === regen;
 };
 
+/**
+ * 對字串進行MD5加密。
+ *
+ * @param {String} str - 輸入字串
+ * @returns {String} result
+*/
 fn.md5 = (str) => {
   const newstr = vcheck.str(str);
   if (newstr === '') return '';
@@ -52,26 +84,36 @@ fn.md5 = (str) => {
   return md5.update(newstr).digest('hex');
 };
 
-fn.replaceAll = (str, search, replace) => str.replace(new RegExp(search, 'g'), replace);
-
-// 將敏感資料中間的字元用o取代
-fn.hashName = (param, replace = '○') => {
-  const str = vcheck.str(param);
-  if (str === '') return '';
-  if (str.length <= 2) return `${str.substr(0, 1)}${replace}`;
-  const cut = Math.floor(str.length / 3);
-  let bstr = str.substr(0, cut);
-  const estr = str.substr(str.length - cut);
-  while (bstr.length + estr.length < str.length) {
+/**
+ * 將敏感資料中間的字元用replace取代，replace預設為'*'。
+ *
+ * @param {String} str - 輸入字串
+ * @param {String} [replace=*] - 要取代的字串
+ * @returns {String} result
+*/
+fn.hashName = (str, replace = '*') => {
+  const ostr = vcheck.str(str);
+  if (ostr === '') return '';
+  if (ostr.length <= 2) return `${ostr.substr(0, 1)}${replace}`;
+  const cut = Math.floor(ostr.length / 3);
+  let bstr = ostr.substr(0, cut);
+  const estr = ostr.substr(ostr.length - cut);
+  while (bstr.length + estr.length < ostr.length) {
     bstr += replace;
   }
   bstr += estr;
   return bstr;
 };
 
-// 將email@之後的字元用o取代
-fn.hashEmail = (param, replace = '○') => {
-  const str = vcheck.str(param);
+/**
+ * 將email@之後的字元用replace取代，replace預設為'*'。
+ *
+ * @param {String} str - 輸入字串
+ * @param {String} [replace=*] - 要取代的字串
+ * @returns {String} result
+*/
+fn.hashEmail = (email, replace = '*') => {
+  const str = vcheck.str(email);
   if (!vcheck.email(str)) return '';
   const sarray = str.split('@');
   const cut = Math.ceil(sarray[0].length / 3);
@@ -84,14 +126,18 @@ fn.hashEmail = (param, replace = '○') => {
   return out;
 };
 
-fn.clientIP = (req) => {
-  const ip = req.headers['x-forwarded-for']
-    || req.connection.remoteAddress
-    || req.socket.remoteAddress
-    || req.connection.socket.remoteAddress;
-  return ip.split(',')[0];
-};
-
+/**
+ * 傳入兩個日期，回傳一個陣列，陣列內容為兩日期之間的每天日期。
+ *
+ * @example
+ * const result = vutils.datesBetween('2020-03-01','2020-03-04');
+ * console.log(result);
+ * //['2020-03-01','2020-03-02','2020-03-03','2020-03-04']
+ *
+ * @param {String} startDate - 起始日期
+ * @param {String} endDate - 終止日期
+ * @returns {Array} result
+*/
 fn.datesBetween = (startDate, endDate) => {
   const dates = [];
   const eDate = vcheck.luxon(endDate);
@@ -103,10 +149,22 @@ fn.datesBetween = (startDate, endDate) => {
   return dates;
 };
 
-// 傳入多個array，並指定keyfield(非必要)
-// 回傳一個keyfield為unique的array
-// 如果沒有指定keyfield，直接比對陣列值
-fn.arrayUnique = (arrays = [], keyfield) => {
+/**
+ * 產生一個具有unique值的array。
+ * 傳入多個array，並指定keyfield(非必要)，回傳一個keyfield為unique的array，如果沒有指定keyfield，直接比對陣列值。
+ * 回傳的array會是原array的deep copy，並不影響原本的array。
+ *
+ * @example
+ * const a1 = [1, 2, 3];
+ * const a2 = [1, 3, 5];
+ * const result = vutils.arrayDistinct([a1, a2]);
+ * console.log(result); //[1, 2, 3, 5]
+ *
+ * @param {Object[]} arrays - 要合併的多個array
+ * @param {String} [keyfield] - 如果array裡是Object，指定要distinct的field name
+ * @returns {Object[]} result array
+ */
+fn.arrayDistinct = (arrays = [], keyfield) => {
   const obj = {};
   const result = [];
   arrays.forEach((ar) => {

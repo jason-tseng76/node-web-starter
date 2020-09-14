@@ -68,7 +68,7 @@ SKGQL.setURL = (url) => {
   _url = url;
 };
 
-SKGQL.cancelCall = (id) => {
+SKGQL.cancelCall = async (id) => {
   if (!id) return;
   const c_id = id.toString();
   try {
@@ -105,7 +105,7 @@ SKGQL.call = async ({
 
     // 如果有指定cancelID，先把同ID的request取消，再加入新的cancelSoure
     if (cancelID) {
-      SKGQL.cancelCall(cancelID);
+      await SKGQL.cancelCall(cancelID);
       const source = axios.CancelToken.source();
       opt.cancelToken = source.token;
       _cancelSources[cancelID.toString()] = source;

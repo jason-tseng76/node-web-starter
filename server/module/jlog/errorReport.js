@@ -1,5 +1,5 @@
 const { ErrorReporting } = require('@google-cloud/error-reporting');
-const event = require('~server/module/event');
+const skevent = require('~server/module/skevent');
 
 let errors;
 
@@ -31,9 +31,12 @@ const report = (e) => {
   } catch (err) { /* */ }
 };
 
-event.dispatcher.on(event.type.REPORT_ERROR, (e) => {
-  report(e);
+skevent.on(skevent.types.REPORT_ERROR, (e) => {
+  report(e.data);
 });
+// event.dispatcher.on(event.type.REPORT_ERROR, (e) => {
+//   report(e);
+// });
 
 module.exports = {
   init,

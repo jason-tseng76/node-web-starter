@@ -1,9 +1,9 @@
-const event = require('~server/module/event');
+const skevent = require('~server/module/skevent');
 
 // 處理HTTP 500
 module.exports = (err, req, res, next) => {
   // 會到這裡的都是重大錯誤，需回報
-  event.dispatcher.fire(event.type.REPORT_ERROR, err);
+  skevent.fire({ type: skevent.types.REPORT_ERROR, data: err });
 
   if (res.headersSent) {
     // 如果標頭已經傳送，則委派給Express預設的error handler處理(通常不會跑到這裡)

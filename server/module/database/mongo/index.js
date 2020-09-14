@@ -6,7 +6,7 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useUnifiedTopology', true);
 
 // 依照設定檔開啟db connection
-const createConnect = ({ uri, options } = { uri: config.MONGO.uri, options: config.MONGO.options || {} }) => {
+const createConnect = ({ uri, options } = { uri: config.DATABASE.MONGO.uri, options: config.DATABASE.MONGO.options || {} }) => {
   const opts = {
     // autoReconnect: true,
     // reconnectTries: Number.MAX_VALUE,
@@ -34,7 +34,16 @@ mongoose.connection.on('disconnected', () => {
 
 exports.createConnect = createConnect;
 // 中斷所有資料庫連線
-exports.disconnect = (callback) => {
-  console.log('\x1b[1m\x1b[34m%s\x1b[0m', '========== Mongoose disconnecting ==========');
-  mongoose.disconnect(callback);
-};
+exports.disconnect = () => new Promise((resolve, reject) => {
+  console.log('\x1b[1m\x1b[34m%s\x1b[0m', '========== Mongoose destroying ==========');
+  try {
+    mongoose.disconnect(() => {
+      console.log('\x1b[1m\x1b[34m%s\x1b[0m', '========== Mongoose destroyed ==========');
+      resolve();
+    });
+  } catch (e) {
+    console.log('\x1b[1m\x1b[34m%s\x1b[0m', '========== Mongoose destroy Error ==========');
+    console.log('\x1b[1m\x1b[34m%s\x1b[0m', e);
+    reject(e);
+  }
+});
